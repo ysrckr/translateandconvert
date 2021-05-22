@@ -1,14 +1,12 @@
-const express = require("express")
-require("dotenv").config()
-const cors = require("cors")
-const axios = require("axios").default
-
+const express = require('express')
+require('dotenv').config()
+const axios = require('axios').default
+const { v4: uuidv4 } = require('uuid')
 
 // Initialize Express
 const app = express()
 
 // Enable CORS
-app.use(cors())
 
 express.static('public')
 app.set('views', './public/views')
@@ -16,38 +14,57 @@ app.set('view engine', 'ejs')
 
 // Body Parser
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: false }))
 
+const translate = async text => {
+	var subscriptionKey = process.env.API_KEY
+	var endpoint = 'https://api.cognitive.microsofttranslator.com'
+
+	// Add your location, also known as region. The default is global.
+	// This is required if using a Cognitive Services resource.
+	var location = 'global'
+
+	try {
+        const response = await axios({
+            baseURL: endpoint,
+            url: '/translate',
+            method: 'post',
+            headers: {
+                'Ocp-Apim-Subscription-Key': subscriptionKey,
+                'Ocp-Apim-Subscription-Region': location,
+                'Content-type': 'application/json',
+                'X-ClientTraceId': uuidv4().toString(),
+            },
+            params: {
+                'api-version': '3.0',
+                from: 'en',
+                to: ['tr'],
+            },
+            data: [
+                {
+                    text: text,
+                },
+            ],
+            responseType: 'json',
+        })
+        const data = await response.data[0].translations[0].text
+        return data
+        
+    } catch (err) {
+        console.error(err)
+    }
+    
+}
 
 app.get('/', (req, res) => {
-  res.render('index')
+	res.render('index')
 })
 
-app.post('/',  (req, res) => {
- 
-    var options = {
-      method: 'POST',
-      url: 'https://google-translate1.p.rapidapi.com/language/translate/v2',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        'accept-encoding': 'application/gzip',
-        'x-rapidapi-key': process.env.API_KEY,
-        'x-rapidapi-host': process.env.API_HOST
-      },
-      data: {q: 'Hello, world!', target: 'tr', source: 'en'}
-    };
-    
-    axios.request(options).then(function (response) {
-        console.log(response.data);
-    }).catch(function (error) {
-        console.error(error);
-    });
-});
-
+app.post('/', (req, res) => {
+	translate(req.body.description)
+	res.redirect('/')
+})
 
 const PORT = process.env.PORT || 5000
 
-app.listen(
-  PORT,
-  console.log(`Server running on port ${PORT}`)
-)
+app.listen(PORT, console.log(`Server running on port ${PORT}`))
