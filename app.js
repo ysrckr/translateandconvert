@@ -8,7 +8,7 @@ const app = express()
 
 // Enable CORS
 
-express.static('public')
+app.use(express.static(__dirname + '/public'))
 app.set('views', './public/views')
 app.set('view engine', 'ejs')
 
@@ -25,44 +25,50 @@ const translate = async text => {
 	var location = 'global'
 
 	try {
-        const response = await axios({
-            baseURL: endpoint,
-            url: '/translate',
-            method: 'post',
-            headers: {
-                'Ocp-Apim-Subscription-Key': subscriptionKey,
-                'Ocp-Apim-Subscription-Region': location,
-                'Content-type': 'application/json',
-                'X-ClientTraceId': uuidv4().toString(),
-            },
-            params: {
-                'api-version': '3.0',
-                from: 'en',
-                to: ['tr'],
-            },
-            data: [
-                {
-                    text: text,
-                },
-            ],
-            responseType: 'json',
-        })
-        const data = await response.data[0].translations[0].text
-        return data
-        
-    } catch (err) {
-        console.error(err)
-    }
-    
+		const response = await axios({
+			baseURL: endpoint,
+			url: '/translate',
+			method: 'post',
+			headers: {
+				'Ocp-Apim-Subscription-Key': subscriptionKey,
+				'Ocp-Apim-Subscription-Region': location,
+				'Content-type': 'application/json',
+				'X-ClientTraceId': uuidv4().toString(),
+			},
+			params: {
+				'api-version': '3.0',
+				from: 'en',
+				to: ['tr'],
+			},
+			data: [
+				{
+					text: text,
+				},
+			],
+			responseType: 'json',
+		})
+		const data = await response.data[0].translations[0].text
+		return data
+	} catch (err) {
+		console.error(err)
+	}
+}
+
+const convert = inch => {
+	return inch * 2.54
 }
 
 app.get('/', (req, res) => {
 	res.render('index')
 })
-
-app.post('/', (req, res) => {
-	translate(req.body.description)
-	res.redirect('/')
+app.post('/translate', async (req, res) => {
+	try {
+		const trans = await translate(req.body.desc)
+		const conv = convert(req.body.measure)
+		res.status(200).json({ trans, conv })
+	} catch (err) {
+		console.error(err)
+	}
 })
 
 const PORT = process.env.PORT || 5000

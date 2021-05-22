@@ -4,23 +4,41 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" type="text/css" href="../css/style.min.css" />
-
+		<link rel="stylesheet" href="../css/style.min.css" />
+		<script
+			defer
+			src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+			integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		></script>
+		<script defer src="../js/main.js" type="text/javascript"></script>
 		<title>Convert and Translate</title>
 	</head>
 	<body>
 		<main>
-			<section>
+			<section class="section-a">
 				<div class="form-container">
-					<form action="/" method="POST">
+					<form id="form">
 						<label for="description">Description</label>
-						<input type="text" name="description" />
+						<input type="text" name="description" id="description"/>
 						<label for="measurement">Measurement</label>
-						<input type="text" name="measurement" />
-						<button type="submit">Add</button>
+						<input type="number" name="measurement" id="measurement" step="0.01">
+						<button type="submit" id="btn">Add</button>
 					</form>
 				</div>
 			</section>
+			<section class="section-b">
+				<div class="list-container">
+					<ul class="list list-desc">
+						<h3>Description</h3>
+					</ul>
+					<ul class="list list-measure">
+						<h3>Measurements</h3>
+					</ul>
+				</div>
+			</section>
+
 		</main>
 	</body>
 </html>
